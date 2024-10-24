@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MT Web Solution - Business Work Tracking</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body,
+        html {
+            height: 100%;
+            margin: 0;
+            font-family: 'Roboto', sans-serif;
+            background: url('5184015.jpg') no-repeat center center fixed;
+            background-size: cover;
+        }
+
+        .navbar {
+            padding: 20px 30px;
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 1000;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            background-color: #c0c7cf;
+        }
+
+        .navbar a {
+            color: rgb(35, 32, 32);
+            font-size: 28px;
+            margin-right: 30px;
+            text-decoration: none;
+        }
+
+        .navbar .brand {
+            font-size: 24px;
+            font-weight: bold;
+            color: #150c0c;
+            text-transform: uppercase;
+        }
+
+
+        .content-box {
+            background-color: rgba(255, 255, 255, 0.9);
+            padding: 40px;
+            border-radius: 20px;
+            margin: 30px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            min-height: 100vh;
+            margin-top: 100px;
+
+        }
+
+
+        h1 {
+            color: #007bff;
+            text-align: center;
+        }
+
+        .form-container {
+            margin: 30px;
+        }
+
+        .note-card {
+            border: 1px solid #ddd;
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+        }
+
+        .note-card button {
+            margin-left: 5px;
+        }
+
+        .form-padding {
+            padding: 30px;
+        }
+
+        .table-layout {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            padding-top: 20px;
+        }
+
+        .table-layout div {
+            background-color: #f9f9f9;
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+        }
+
+        .note-header {
+            font-weight: bold;
+            background-color: #007bff;
+            color: white;
+            padding: 10px;
+            text-align: center;
+        }
+
+        .login-box {
+            max-width: 400px;
+            margin: 300px auto;
+            padding: 30px;
+            background-color: rgba(255, 255, 255, 0.9);
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<body>
+    <div class="login-box" id="loginBox">
+        <h1>Login</h1>
+        <input type="text" class="form-control mb-3" id="username" placeholder="Enter Username">
+        <input type="password" class="form-control mb-3" id="password" placeholder="Enter Password">
+        <button class="btn btn-primary" onclick="checkLogin()">Login</button>
+    </div>
+
+    <div class="navbar" id="mainNavbar">
+        <span class="brand">MT Web Solution</span>
+        <a href="#" onclick="showSection('section1')">Add Work</a>
+        <a href="#" onclick="showSection('section2')">View Noted Work</a>
+        <a href="#" onclick="showSection('section3')">Work Summary</a>
+    </div>
+
+
+    <div id="section1" class="content-box form-padding" style="display:none;">
+        <h1>Add Work</h1>
+        <div class="d-flex flex-column align-items-center">
+            <input type="text" class="form-control mb-3" id="businessName" placeholder="Enter Business Name">
+            <textarea class="form-control mb-3" id="workDetails" rows="3" placeholder="Enter Work Details"></textarea>
+            <input type="number" class="form-control mb-3" id="submissionCount" placeholder="Enter Submission Count">
+            <input type="date" class="form-control mb-3" id="workDate">
+            <button class="btn btn-primary" onclick="addNote()">Add Work</button>
+        </div>
+    </div>
+
+    <div id="section2" class="content-box form-padding" style="display:none;">
+        <h1>Your Saved Work</h1>
+        <div class="note-header">Noted Work</div>
+        <div class="table-layout" id="notesList"></div>
+        <button class="btn btn-primary mt-3" onclick="fetchNotes()">Refresh Notes</button>
+    </div>
+
+    <div id="section3" class="content-box form-padding" style="display:none;">
+        <h1>Work Summary</h1>
+        <div class="row text-center justify-content-center">
+            <div class="col-md-5 mb-3">
+                <div class="dashboard-card">
+                    <h3 id="totalWorks">0</h3>
+                    Total Works
+                </div>
+            </div>
+            <div class="col-md-5 mb-3">
+                <div class="dashboard-card">
+                    <h3 id="totalSubmissions">0</h3>
+                    Total Submissions
+                </div>
+            </div>
+        </div>
+        <canvas id="submissionChart" width="400" height="200"></canvas>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        const correctUsername = 'TanzeelYousef';
+        const correctPassword = 'TanZeel Yousef 123411';
+
+        function checkLogin() {
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+
+            if (username === correctUsername && password === correctPassword) {
+                document.getElementById('loginBox').style.display = 'none';
+                document.getElementById('mainNavbar').style.display = 'flex';
+                showSection('section1'); // Show the first section after successful login
+            } else {
+                alert('Incorrect Username or Password. Please try again.');
+            }
+        }
+
+        function showSection(sectionId) {
+            var sections = document.querySelectorAll('.content-box');
+            sections.forEach(section => section.style.display = 'none');
+
+            document.getElementById(sectionId).style.display = 'block';
+        }
+
+        function addNote() {
+            const businessName = document.getElementById('businessName').value;
+            const workDetails = document.getElementById('workDetails').value;
+            const submissionCount = document.getElementById('submissionCount').value;
+            const workDate = document.getElementById('workDate').value;
+
+            if (businessName && workDetails && submissionCount && workDate) {
+                let notes = JSON.parse(localStorage.getItem('notes')) || [];
+                const newNote = { businessName, workDetails, submissionCount, workDate };
+
+                notes.push(newNote);
+
+                localStorage.setItem('notes', JSON.stringify(notes));
+                fetchNotes();
+                clearFields();
+            } else {
+                alert('Please fill all fields.');
+            }
+        }
+
+        function fetchNotes() {
+            let notes = JSON.parse(localStorage.getItem('notes')) || [];
+            const notesList = document.getElementById('notesList');
+            const totalWorks = document.getElementById('totalWorks');
+            const totalSubmissions = document.getElementById('totalSubmissions');
+            let workCount = 0;
+            let submissionSum = 0;
+
+            notesList.innerHTML = '';
+
+            if (notes.length > 0) {
+                notes.forEach((note, index) => {
+                    workCount++;
+                    submissionSum += parseInt(note.submissionCount);
+
+                    const noteBlock = document.createElement('div');
+                    noteBlock.innerHTML = `
+                        <div><strong>Business Name:</strong> ${note.businessName}</div>
+                        <div><strong>Work Done:</strong> ${note.workDetails}</div>
+                        <div><strong>Submissions:</strong> ${note.submissionCount}</div>
+                        <div><strong>Date:</strong> ${note.workDate}</div>
+                        <button class="btn btn-danger btn-sm" onclick="deleteNote(${index})">Delete</button>
+                    `;
+                    notesList.appendChild(noteBlock);
+                });
+
+                totalWorks.innerHTML = workCount;
+                totalSubmissions.innerHTML = submissionSum;
+            } else {
+                notesList.innerHTML = 'No work data found.';
+                totalWorks.innerHTML = '0';
+                totalSubmissions.innerHTML = '0';
+            }
+        }
+
+        function deleteNote(index) {
+            let notes = JSON.parse(localStorage.getItem('notes')) || [];
+            if (confirm('Are you sure you want to delete this work?')) {
+                notes.splice(index, 1); // Remove the note at the given index
+                localStorage.setItem('notes', JSON.stringify(notes));
+                fetchNotes();
+            }
+        }
+
+        function clearFields() {
+            document.getElementById('businessName').value = '';
+            document.getElementById('workDetails').value = '';
+            document.getElementById('submissionCount').value = '';
+            document.getElementById('workDate').value = '';
+        }
+
+        window.onload = function () {
+            fetchNotes();
+        };
+    </script>
+</body>
+
+</html>
